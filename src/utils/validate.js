@@ -1,0 +1,35 @@
+const validateForm = (email,password,name,isSignup) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  const nameRegex = /^[A-Za-z]+$/;
+  console.log("validateForm called with:", { email, password, name, isSignup });
+  if (!email || !password) {
+    return { isValid: false, message: "Email and password are required." };
+  }
+
+  if (isSignup && !name) {
+    return { isValid: false, message: "Name is required." };
+  }
+
+  if (isSignup) {
+    if (!nameRegex.test(name)) {
+      return { isValid: false, message: "Invalid name format." };
+    }
+  }
+
+  if (!emailRegex.test(email)) {
+    return { isValid: false, message: "Invalid email format." };
+  }
+
+  if (!passwordRegex.test(password)) {
+    return {
+      isValid: false,
+      message:
+        "Password must be at least 8 characters long and contain at least one letter and one number.",
+    };
+  }
+
+  return { isValid: true, message: "Form is valid." };
+};
+
+export default validateForm;
