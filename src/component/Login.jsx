@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import { useRef, useState } from "react";
 import Header from "./Header";
-import { useState } from "react";
 import validateForm from "../utils/validate";
+import { auth } from "../utils/firebase";
+import { signInWithEmailAndPassword ,createUserWithEmailAndPassword} from "firebase/auth";
 
 const Login = () => {
   const [isSignup, setIsSignup] = useState(false);
@@ -12,13 +13,45 @@ const Login = () => {
 
   const handleButtonClick = (e) => {
     e.preventDefault();
-    const emailValue = email.current.value;
+    const emailValue = email.current.value.trim();
     const passwordValue = password.current.value;
-    const nameValue = name.current?.value || "";
-    const { isValid, message } = validateForm(emailValue, passwordValue, nameValue, isSignup);
+    const nameValue = name.current?.value.trim() || "";
+    const { isValid, message } = validateForm(
+      emailValue,
+      passwordValue,
+      nameValue,
+      isSignup,
+    );
     isValid ? setErrorMessage("") : setErrorMessage(message);
-   
-  }
+
+    if (!isValid) {
+      return;
+    }
+    if (isSignup) {
+      // Handle sign-up logic here
+      createUserWithEmailAndPassword(auth, emailValue, passwordValue)
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log("User signed up:", user);
+          // ...
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+        });
+    } else {
+      signInWithEmailAndPassword(auth, emailValue, passwordValue)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("User signed in:", user);
+          // ...
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+        });
+    }
+  };
 
   const toggleSignUpform = () => {
     setIsSignup(!isSignup);
@@ -58,7 +91,10 @@ const Login = () => {
           className="p-2 my-4 w-full bg-zinc-700 rounded"
         />
         <p className="text-red-500 ">{errorMessage}</p>
-        <button onClick={handleButtonClick} className="bg-red-600  p-2 my-6 w-full rounded cursor-pointer">
+        <button
+          onClick={handleButtonClick}
+          className="bg-red-600  p-2 my-6 w-full rounded cursor-pointer"
+        >
           {isSignup ? "Sign Up" : "Sign In"}
         </button>
         {isSignup ? (

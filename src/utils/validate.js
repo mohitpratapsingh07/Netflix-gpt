@@ -1,23 +1,25 @@
 const validateForm = (email,password,name,isSignup) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-  const nameRegex = /^[A-Za-z]+$/;
-  console.log("validateForm called with:", { email, password, name, isSignup });
-  if (!email || !password) {
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)\S{8,}$/;
+  const nameRegex = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+  const normalizedEmail = email?.trim() || "";
+  const normalizedName = name?.trim() || "";
+
+  if (!normalizedEmail || !password) {
     return { isValid: false, message: "Email and password are required." };
   }
 
-  if (isSignup && !name) {
+  if (isSignup && !normalizedName) {
     return { isValid: false, message: "Name is required." };
   }
 
   if (isSignup) {
-    if (!nameRegex.test(name)) {
+    if (!nameRegex.test(normalizedName)) {
       return { isValid: false, message: "Invalid name format." };
     }
   }
 
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(normalizedEmail)) {
     return { isValid: false, message: "Invalid email format." };
   }
 
