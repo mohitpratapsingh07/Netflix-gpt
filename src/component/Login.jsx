@@ -2,9 +2,18 @@ import { useRef, useState } from "react";
 import Header from "./Header";
 import validateForm from "../utils/validate";
 import { auth } from "../utils/firebase";
-import { signInWithEmailAndPassword ,createUserWithEmailAndPassword} from "firebase/auth";
+import {  updateProfile } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../utils/userSlice"; 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
   const email = useRef(null);
   const password = useRef(null);
@@ -33,8 +42,16 @@ const Login = () => {
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
-          console.log("User signed up:", user);
-          // ...
+          updateProfile(user, {
+            displayName: nameValue,
+            photoURL: "https://example.com/jane-q-user/profile.jpg",
+          }).then(() => {
+            // Profile updated!
+            // ...
+             const { uid, email, displayName } = auth.currentUser;
+            dispatch(addUser({ uid:uid, email:email, displayName:displayName }));
+            navigate("/browse");
+          });
         })
         .catch((error) => {
           setErrorMessage(error.message);
@@ -44,6 +61,7 @@ const Login = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
+          navigate("/browse");
           console.log("User signed in:", user);
           // ...
         })
@@ -98,7 +116,7 @@ const Login = () => {
           {isSignup ? "Sign Up" : "Sign In"}
         </button>
         {isSignup ? (
-          <p onClick={toggleSignUpform} className="py4 cursor-pointer">
+          <p onClick={toggleSignUpform} className="py-4 cursor-pointer">
             Already have an account?{" "}
             <span className="cursor-pointer hover:underline">Sign in</span>.
           </p>
